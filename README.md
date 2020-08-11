@@ -4,7 +4,7 @@ A C implementation of the AirTight protocol from the Real-Time Systems group at 
 
 ## Introduction
 
-AirTight is a protocol for critical wireless communication based on the [IEEE 802.15.4]{https://en.wikipedia.org/wiki/IEEE_802.15.4} MAC and physical layers.
+AirTight is a protocol for critical wireless communication based on the [IEEE 802.15.4](https://en.wikipedia.org/wiki/IEEE_802.15.4) MAC and physical layers.
 
 AirTight is described in the paper:
 > A. Burns, J. Harbin, L. Indrusiak, I. Bate, R. Davis and D. Griffin, "AirTight: A Resilient Wireless Communication Protocol for Mixed-Criticality Systems," 2018 IEEE 24th International Conference on Embedded and Real-Time Computing Systems and Applications (RTCSA), Hakodate, 2018, pp. 65-75, doi: 10.1109/RTCSA.2018.00017.
