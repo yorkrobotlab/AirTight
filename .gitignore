@@ -1,0 +1,5 @@
+bin/
+obj/
+xbee_ansic_library/
+doc/
+.vscode/

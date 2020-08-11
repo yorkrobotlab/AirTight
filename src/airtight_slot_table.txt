@@ -1,0 +1,20 @@
+SLOT_TABLE = {
+    {{
+        IDLE,
+        TRANSMIT,
+        LISTEN,
+        LISTEN,
+    }},
+    {{
+        IDLE,
+        LISTEN,
+        TRANSMIT,
+        LISTEN,
+    }},
+    {{
+        IDLE,
+        LISTEN,
+        LISTEN,
+        TRANSMIT,
+    }}
+};

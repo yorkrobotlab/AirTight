@@ -1,0 +1,5 @@
+/* Format: HOP(id, destination, next_hop) */
+
+HOP(0, 2, 1)
+
+HOP(2, 0, 1)
