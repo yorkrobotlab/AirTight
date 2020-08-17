@@ -11,6 +11,7 @@ void Airtight_InitialiseMACState(Airtight_MACState *mac_state)
     mac_state->fault_active = false;
     mac_state->receive_callback = NULL;
     mac_state->transmit_handler = NULL;
+    mac_state->notification_handler = NULL;
 
     Airtight_PCQ_Init(&mac_state->queue);
     Airtight_History_Init(&mac_state->send_history);
@@ -29,6 +30,12 @@ void Airtight_SetTransmitHandler(Airtight_MACState *mac_state, Airtight_Transmit
 {
     AT_ENTER(Airtight_SetTransmitHandler);
     mac_state->transmit_handler = handler;
+}
+
+void Airtight_SetNotificationHandler(Airtight_MACState *mac_state, Airtight_NotificationHandler handler)
+{
+    AT_ENTER(Airtight_SetNotificationHandler);
+    mac_state->notification_handler = handler;
 }
 
 at_bool_t Airtight_CheckShouldGoHigh(Airtight_MACState *mac_state)
@@ -189,9 +196,22 @@ void Airtight_HandleTransmitSlot(Airtight_MACState *mac_state)
 
 void Airtight_HandleBroadcastSync(Airtight_MACState *mac_state)
 {
-    // TODO: send sync
     Airtight_Notification notification =
-        {{.fault_activity = FAULT_SYNC, .root_id = AT_CONF_NODE_ID, .sync_slot = mac_state->local_slot}};
+        {{.fault_activity = FAULT_SYNC,
+          .root_id = AT_CONF_NODE_ID,
+          .sync_slot = mac_state->local_slot,
+          .sync_time = Airtight_Time_GetSynchronisedTime(&mac_state->time)}};
+
+    if (NULL != mac_state->transmit_handler)
+    {
+        AT_DEBUG("Airtight_HandleTransmitSlot: calling transmit handler");
+
+        mac_state->notification_handler(&notification);
+    }
+    else
+    {
+        AT_DEBUG("Airtight_HandleTransmitSlot: warning, no transmit handler");
+    }
 }
 
 void Airtight_DoSlot(Airtight_MACState *mac_state, at_u8_t slot)
@@ -434,5 +454,47 @@ void Airtight_HandleReceive(Airtight_MACState *mac_state, Airtight_Packet *packe
         {
             mac_state->receive_callback(packet);
         }
+    }
+}
+
+/**
+ * Synchronise protocol state based on sync slot and time.
+ */
+void Airtight_SynchroniseNow(Airtight_MACState *mac_state, at_u8_t sync_slot, at_time_t sync_time)
+{
+    AT_ENTER(Airtight_SynchroniseNow);
+
+    at_i16_t slot_difference = sync_slot - mac_state->local_slot;
+    mac_state->local_slot = sync_slot;
+    mac_state->current_slot += slot_difference;
+    mac_state->previous_slot += slot_difference;
+    Airtight_Time_SetSynchronisationPoint(&mac_state->time, sync_time);
+
+    // More complex synchronisation may be performed here in later revisions.
+}
+
+/**
+ * Handle reception of notification.
+ */
+void Airtight_HandleNotificationReceive(Airtight_MACState *mac_state, Airtight_Notification *notification)
+{
+    AT_ENTER(Airtight_HandleNotificationReceive);
+
+    if (notification->fields.fault_activity == FAULT_SYNC)
+    {
+        AT_DEBUG("Airtight_HandleNotificationReceive: received sync fault");
+
+#ifdef AIRTIGHT_DEBUG
+        if (notification->fields.root_id != AT_CONF_SYNC_NODE_ID)
+        {
+            AT_DEBUG("Airtight_HandleNotificationReceive: warning, sync not from sync node");
+        }
+#endif
+
+#if (AT_CONF_NODE_ID == AT_CONF_SYNC_NODE_ID)
+        // We do not synchronise if we are the sync node.
+#else
+        Airtight_SynchroniseNow(mac_state, notification->fields.sync_slot, notification->fields.sync_time);
+#endif
     }
 }

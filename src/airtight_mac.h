@@ -18,6 +18,7 @@
 
 typedef void (*Airtight_ReceiveCallback)(Airtight_Packet *packet);
 typedef void (*Airtight_TransmitHandler)(Airtight_Packet *packet);
+typedef void (*Airtight_NotificationHandler)(Airtight_Notification *notification);
 
 /**
  * Full MAC State store.
@@ -46,6 +47,7 @@ typedef struct
 
     Airtight_ReceiveCallback receive_callback;
     Airtight_TransmitHandler transmit_handler;
+    Airtight_NotificationHandler notification_handler;
     Airtight_Radio *radio;
 } Airtight_MACState;
 
@@ -57,5 +59,7 @@ void Airtight_RegisterSendComplete(Airtight_MACState *mac_state, Airtight_Packet
 void Airtight_SetTransmitHandler(Airtight_MACState *mac_state, Airtight_TransmitHandler handler);
 void Airtight_ClearFault(Airtight_MACState *mac_state);
 void Airtight_HandleReceive(Airtight_MACState *mac_state, Airtight_Packet *packet);
+void Airtight_HandleNotificationReceive(Airtight_MACState *mac_state, Airtight_Notification *notification);
+void Airtight_SetNotificationHandler(Airtight_MACState *mac_state, Airtight_NotificationHandler handler);
 
 #endif

@@ -38,6 +38,11 @@ typedef uint32_t at_u32_t;
 typedef int16_t at_i16_t;
 
 /**
+ * 32-bit signed type.
+ */
+typedef int32_t at_i32_t;
+
+/**
  * Number of priority levels.
  */
 #define AIRTIGHT_PRIORITIES 3
@@ -79,5 +84,10 @@ typedef at_u8_t Airtight_NodeId;
  * Time representation type.
  */
 typedef at_u32_t at_time_t;
+
+/**
+ * Time difference type.
+ */
+typedef at_i32_t at_timediff_t;
 
 #endif

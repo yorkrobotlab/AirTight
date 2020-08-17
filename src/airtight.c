@@ -84,6 +84,26 @@ void Integration_TransmitHandler(Airtight_Packet *packet)
 }
 
 /**
+ * Notification transmission handler.
+ *
+ * Takes notifications from AirTight and transforms them for the radio.
+ */
+void Integration_NotificationHandler(Airtight_Notification *notification)
+{
+    AT_ENTER(Integration_NotificationHandler);
+    xbee_header_transmit_t transmit_header;
+    transmit_header.frame_type = XBEE_FRAME_TRANSMIT;
+    transmit_header.frame_id = xbee_next_frame_id(&mac_state.radio->device);
+    transmit_header.ieee_address = _WPAN_IEEE_ADDR_UNDEFINED;
+    transmit_header.network_address_be = WPAN_NET_ADDR_BCAST_ALL_NODES;
+    transmit_header.broadcast_radius = 0;
+    transmit_header.options = 0;
+
+    AT_DEBUG("Integration_NotificationHandler: Transmitting!");
+    xbee_frame_write(&mac_state.radio->device, &transmit_header, sizeof(transmit_header), &notification->raw, AIRTIGHT_NOTIFICATION_PACKET, 0);
+}
+
+/**
  * Reception handler.
  *
  * Takes packets from the radio and sends them to AirTight.
@@ -94,7 +114,7 @@ void Integration_ReceiveHandler(at_u8_t *raw_packet, at_u16_t length)
 
     if (length >= AIRTIGHT_PACKET_META)
     {
-        AT_DEBUG("Integration_ReceiveHandler: Received valid packet");
+        AT_DEBUG("Integration_ReceiveHandler: Received packet");
         Airtight_Packet packet;
 
         memset(&packet.data.raw, 0, sizeof(packet.data.raw));
@@ -105,6 +125,15 @@ void Integration_ReceiveHandler(at_u8_t *raw_packet, at_u16_t length)
 #endif
 
         Airtight_HandleReceive(&mac_state, &packet);
+    }
+    else if (length == AIRTIGHT_NOTIFICATION_PACKET)
+    {
+        AT_DEBUG("Integration_ReceiveHandler: Received notification");
+        Airtight_Notification notification;
+
+        memcpy(&notification.raw, raw_packet, length < sizeof(notification.raw) ? length : sizeof(notification.raw));
+
+        Airtight_HandleNotificationReceive(&mac_state, &notification);
     }
 }
 
@@ -208,6 +237,7 @@ int main(void)
 
     Airtight_SetReceiveCallback(&mac_state, App_HandleReceive);
     Airtight_SetTransmitHandler(&mac_state, Integration_TransmitHandler);
+    Airtight_SetNotificationHandler(&mac_state, Integration_NotificationHandler);
 
     // Core event loop
     while (1)

@@ -16,7 +16,7 @@
 typedef struct
 {
     at_time_t base_local;
-    at_time_t offset;
+    at_timediff_t offset;
 } Airtight_Time;
 
 /**
@@ -31,6 +31,7 @@ typedef struct
 
 void Airtight_Time_Init(Airtight_Time *time);
 at_time_t Airtight_Time_GetSynchronisedTime(Airtight_Time *time);
+void Airtight_Time_SetSynchronisationPoint(Airtight_Time *time, at_time_t sync_time);
 void Airtight_Time_1ms();
 
 void Airtight_Time_SetAlarm(Airtight_Alarm *alarm, at_time_t in);

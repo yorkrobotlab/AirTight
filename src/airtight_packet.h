@@ -25,7 +25,7 @@
 /**
  * The size of a notification packet.
  */
-#define AIRTIGHT_NOTIFICATION_PACKET 4
+#define AIRTIGHT_NOTIFICATION_PACKET 8
 
 /**
  * The size of full Airtight packet.
@@ -35,6 +35,8 @@
 // \cond DO_NOT_DOCUMENT
 #ifndef __LINT
 #define PACKED __attribute__((packed))
+#else
+#define PACKED
 #endif
 // \endcond
 
@@ -97,11 +99,12 @@ typedef enum
 /**
  * Notification packet inner data fields.
  */
-typedef struct
+typedef struct PACKED
 {
     Airtight_NodeId root_id : 8;
     Airtight_Fault fault_activity : 8;
     at_u16_t sync_slot : 16;
+    at_time_t sync_time : 32;
 } Airtight_NotificationInner;
 
 /**

@@ -55,6 +55,15 @@ at_time_t Airtight_Time_GetSynchronisedTime(Airtight_Time *time)
 }
 
 /**
+ * Synchronise time using a reference value.
+ */
+void Airtight_Time_SetSynchronisationPoint(Airtight_Time *time, at_time_t sync_time)
+{
+    at_time_t current = Airtight_Time_ClockMS() + time->offset - time->base_local;
+    time->offset += sync_time - current;
+}
+
+/**
  * Wait for at least 1 millisecond.
  *
  * This is useful when used with any function which gets it's time from
