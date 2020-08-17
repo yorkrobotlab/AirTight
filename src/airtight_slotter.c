@@ -28,7 +28,7 @@ void Airtight_Slotter_SingleThreadedSlotterTick(Airtight_MACState *mac_state,
     {
         AT_DEBUG("Slotter: doing slot.");
         (*slot)++;
-        if (*slot > AT_CONF_SLOT_TABLE_ROWS)
+        if (*slot >= AT_CONF_SLOT_TABLE_ROWS)
             *slot = 0;
         Airtight_DoSlot(mac_state, *slot);
         *counter = current_time / AT_CONF_SLOT_LENGTH_MS;

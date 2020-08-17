@@ -16,6 +16,7 @@
 typedef struct
 {
     Airtight_Packet packet;
+    at_bool_t notification;
     at_bool_t active;
 } Integration_TransmitRecord;
 
@@ -47,15 +48,25 @@ Integration_TransmitRecord packet_id_table[256] = {{.active = false}};
 void Integration_TransmitStatusHandler(at_u8_t packet_id, at_u8_t status)
 {
     AT_ENTER(Integration_TransmitStatusHandler);
-    if (packet_id_table[packet_id].active && (status == 0x00 || status == 0x01))
+    if (status == 0x00 || status == 0x01)
     {
-        AT_DEBUG("Integration_TransmitStatusHandler: identified packet");
-        Airtight_RegisterSendComplete(&mac_state, &packet_id_table[packet_id].packet, status == 0x00);
-        packet_id_table[packet_id].active = false;
-    }
-    else
-    {
-        AT_DEBUG("Integration_TransmitStatusHandler: status error.");
+        if (packet_id_table[packet_id].active)
+        {
+            AT_DEBUG("Integration_TransmitStatusHandler: identified packet");
+            if (packet_id_table[packet_id].notification)
+            {
+                AT_DEBUG("Integration_TransmitStatusHandler: notification status, ignoring");
+            }
+            else
+            {
+                Airtight_RegisterSendComplete(&mac_state, &packet_id_table[packet_id].packet, status == 0x00);
+            }
+            packet_id_table[packet_id].active = false;
+        }
+        else
+        {
+            AT_DEBUG("Integration_TransmitStatusHandler: status error.");
+        }
     }
 }
 
@@ -77,6 +88,7 @@ void Integration_TransmitHandler(Airtight_Packet *packet)
     transmit_header.options = 0;
 
     memcpy(&packet_id_table[transmit_header.frame_id].packet, packet, sizeof(Airtight_Packet));
+    packet_id_table[transmit_header.frame_id].notification = false;
     packet_id_table[transmit_header.frame_id].active = true;
 
     AT_DEBUG("Integration_TransmitHandler: Transmitting!");
@@ -99,7 +111,10 @@ void Integration_NotificationHandler(Airtight_Notification *notification)
     transmit_header.broadcast_radius = 0;
     transmit_header.options = 0;
 
-    AT_DEBUG("Integration_NotificationHandler: Transmitting!");
+    packet_id_table[transmit_header.frame_id].notification = true;
+    packet_id_table[transmit_header.frame_id].active = true;
+
+    AT_DEBUG("Integration_NotificationHandler: Transmitting Notification!");
     xbee_frame_write(&mac_state.radio->device, &transmit_header, sizeof(transmit_header), &notification->raw, AIRTIGHT_NOTIFICATION_PACKET, 0);
 }
 
