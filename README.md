@@ -67,6 +67,16 @@ The full network of connections between nodes and the hops required to route pac
 
 Further configuration parameters can be found in `src/airtight_mac_config.h` and are documented there.
 
+## Configuring the XBee Modules
+
+The XBee module must have the 802.15.4 firmware and the following configuration must be set:
+
+| AT Command | Description | Value                              |
+| ---------- | ----------- | ---------------------------------- |
+| `MM`       | MAC Mode    | Strict 802.15.4 with ACKs (2)      |
+| `AP`       | API Mode    | API Mode Without Escapes (1)       |
+| `BU`       | Baud Rate   | Same as configured in `airtight.c` |
+
 ## Debugging
 
 Debugging is enabled by default but can be disabled by undefining `AIRTIGHT_DEBUG` in `src/airtight_utilities.h`.
