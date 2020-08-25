@@ -228,7 +228,7 @@ int main(void)
     //  - and strict 802.15.4 with ACKs.
     Airtight_Radio radio = {
         .serial.device = "/dev/ttyS3",
-        .serial.baudrate = 9600,
+        .serial.baudrate = 115200,
     };
     mac_state.radio = &radio;
 

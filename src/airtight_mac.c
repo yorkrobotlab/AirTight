@@ -253,7 +253,7 @@ void Airtight_Enqueue(Airtight_MACState *mac_state, Airtight_Packet *packet)
     if (priority >= AIRTIGHT_PRIORITY_MIN && priority <= AIRTIGHT_PRIORITY_MAX)
     {
         AT_DEBUG("Airtight_Enqueue: enqueuing packet.");
-        AT_LOG_MAC(mac_state, "ENQUEUE", (*packet));
+        AT_LOG_MAC(mac_state, "ENQUEUE", *packet);
 #if (AT_CONF_COPY_IN_ENQUEUE == 1)
         // We make a copy so we don't alter the original
         Airtight_Packet data_packet;
@@ -314,7 +314,7 @@ void Airtight_Send(Airtight_MACState *mac_state, Airtight_Packet *packet)
     }
 #endif
 
-    AT_LOG_MAC(mac_state, "SEND", (*packet));
+    AT_LOG_MAC(mac_state, "SEND", *packet);
 
     at_u8_t base_sequence_number = packet->data.fields.sequence_number;
 
@@ -347,12 +347,13 @@ void Airtight_RegisterSendComplete(Airtight_MACState *mac_state, Airtight_Packet
     {
         AT_DEBUG("Airtight_RegisterSendComplete: acked successfully with no active fault.");
 
-        AT_LOG_MAC(mac_state, "ACK_SUCCESS", (*packet));
+        AT_LOG_MAC(mac_state, "ACK_SUCCESS", *packet);
         Airtight_RecordSuccessfullySentPacket(mac_state, packet);
 
         if (priority >= AIRTIGHT_PRIORITY_MIN && priority <= AIRTIGHT_PRIORITY_MAX)
         {
             AT_DEBUG("Airtight_RegisterSendComplete: Dequeued packet");
+            AT_LOG_MAC(mac_state, "DEQUEUE", *packet);
             Airtight_PCQ_DequeuePriorityCriticality(&mac_state->queue, priority, criticality, NULL);
         }
         else
@@ -370,7 +371,7 @@ void Airtight_RegisterSendComplete(Airtight_MACState *mac_state, Airtight_Packet
         }
 
         AT_DEBUG("Airtight_RegisterSendComplete: Registering failed ack.");
-        AT_LOG_MAC(mac_state, "ACK_FAIL", (*packet));
+        AT_LOG_MAC(mac_state, "ACK_FAIL", *packet);
         Airtight_RegisterFailedAck(mac_state);
 
         AT_DEBUG("Airtight_RegisterSendComplete: checking to go high...");
@@ -390,6 +391,7 @@ void Airtight_RegisterSendComplete(Airtight_MACState *mac_state, Airtight_Packet
             AT_DEBUG("Airtight_RegisterSendComplete: dequeueing packet");
             if (priority >= AIRTIGHT_PRIORITY_MIN && priority <= AIRTIGHT_PRIORITY_MAX)
             {
+                AT_LOG_MAC(mac_state, "DEQUEUE", *packet);
                 Airtight_PCQ_DequeuePriorityCriticality(&mac_state->queue, priority, criticality, NULL);
             }
             else
@@ -421,7 +423,7 @@ void Airtight_HandleReceive(Airtight_MACState *mac_state, Airtight_Packet *packe
 
     const Airtight_NodeId received_destination = packet->data.fields.destination;
 
-    AT_LOG_MAC(mac_state, "RECEIVE", (*packet));
+    AT_LOG_MAC(mac_state, "RECEIVE", *packet);
 
     AT_DEBUGF("Airtight_HandleReceive: received packet destination %x.\n", received_destination);
 
@@ -468,7 +470,7 @@ void Airtight_SynchroniseNow(Airtight_MACState *mac_state, at_u8_t sync_slot, at
     mac_state->local_slot = sync_slot;
     mac_state->current_slot += slot_difference;
     mac_state->previous_slot += slot_difference;
-    Airtight_Time_SetSynchronisationPoint(&mac_state->time, sync_time);
+    Airtight_Time_SetSynchronisationPoint(&mac_state->time, sync_time + AT_CONF_SYNC_TIME_OFFSET);
 
     // More complex synchronisation may be performed here in later revisions.
 }

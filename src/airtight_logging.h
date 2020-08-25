@@ -27,7 +27,7 @@
         printf(AIRTIGHT_LOGGING_PREFIX "%u %s %u %u ", time, event, AT_CONF_NODE_ID, slot); \
         for (size_t _i = 0; _i < AIRTIGHT_PACKET_SIZE; _i++)                                \
         {                                                                                   \
-            printf("%02x", packet.data.raw[_i]);                                            \
+            printf("%02x", (packet).data.raw[_i]);                                            \
         }                                                                                   \
         puts("");                                                                           \
     } while (0)

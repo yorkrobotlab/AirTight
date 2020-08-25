@@ -9,6 +9,7 @@
 
 #include "airtight_types.h"
 #include "airtight_mac_config.h"
+#include "airtight_utilities.h"
 
 Airtight_NodeId Airtight_NextHop(Airtight_NodeId destination_node_id);
 

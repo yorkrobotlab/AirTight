@@ -97,6 +97,11 @@
 #define AT_CONF_SYNC_SLOT_INDEX 0
 
 /**
+ * Estimated inaccuracy in synchronisation due to transmission overheads.
+ */
+#define AT_CONF_SYNC_TIME_OFFSET 20
+
+/**
  * The length of transmit and receive histories.
  */
 #define AT_CONF_HISTORY_SIZE 10
