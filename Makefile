@@ -13,6 +13,7 @@ CFLAGS ?= -std=c99 -Wall -Wextra -pedantic $(DEFINE) -I. -I./xbee/src
 CFLAGS_DEPS ?= -MMD -MP $(CFLAGS)
 OBJ = $(patsubst src/%.c,obj/%.o,$(wildcard src/*.c))
 DEPS = $(OBJ:.o=.d)
+LIB_DEPS = xbee\bin\libxbee.a
 
 TARGET := airtight
 
@@ -24,9 +25,12 @@ obj/%.o: src/%.c
 	@ mkdir -p obj
 	$(CC) -c -o $@ $< $(CFLAGS_DEPS)
 
-bin/$(TARGET): src/$(TARGET).c $(OBJ)
+bin/$(TARGET): src/$(TARGET).c $(OBJ) $(LIB_DEPS)
 	@ mkdir -p bin
 	$(CC) $(CFLAGS) -o bin/$(TARGET) $(OBJ) $(LIBS)
+
+xbee\bin\libxbee.a:
+	cd xbee && $(MAKE)
 
 run: bin/$(TARGET)
 	./bin/$(TARGET) $(ARGS)
@@ -42,5 +46,6 @@ clean:
 	$(RM) $(OBJ)
 	$(RM) $(DEPS)
 	$(RM) bin/$(TARGET)
+	cd xbee && $(MAKE) clean
 
 -include $(DEPS)
